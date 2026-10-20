@@ -1,0 +1,14 @@
+.unicode-display-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.unicode-display-settings h4 {
+    margin: 0;
+}
+
+.unicode-display-settings .unicode-display-hint {
+    opacity: 0.75;
+}
+
