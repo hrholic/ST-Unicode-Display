@@ -174,4 +174,3 @@ export function createTextNodeProcessor(getSettings) {
 
     return { process, restore };
 }
-
