@@ -1,5 +1,5 @@
 {
-    "display_name": "Unicode ת����ʾ��ԭ",
+    "display_name": "Unicode 转义显示还原",
     "loading_order": 50,
     "js": "index.js",
     "css": "style.css",
@@ -9,4 +9,3 @@
     "auto_update": false,
     "minimum_client_version": "1.12.0"
 }
-
