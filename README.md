@@ -4,7 +4,8 @@
 
 ## 功能与边界
 
-- 默认开启，仅处理 AI 回复；可在扩展设置中改为“全部聊天消息”或关闭。
+- 默认开启，仅处理 AI 回复；可在入口弹窗中改为“全部聊天消息”或关闭。
+- 设置入口位于聊天输入框左侧的魔杖“扩展”菜单，点击后在原生弹窗中调整开关和适用范围。
 - 支持 `\uXXXX`、UTF-16 代理对 emoji，以及 `\u{1F600}` 形式。
 - 非法转义和孤立代理保持原样。
 - 跳过 `pre`、`code`、`kbd`、`samp`、编辑框及可编辑区域。
@@ -25,7 +26,7 @@ https://github.com/hrholic/ST-Unicode-Display
 1. 当前用户：复制到 `SillyTavern/data/<用户句柄>/extensions/unicode-display-decoder/`。
 2. 所有用户：复制到 `SillyTavern/public/scripts/extensions/third-party/unicode-display-decoder/`。
 
-然后重启或重新加载 SillyTavern，在“扩展”设置中找到“Unicode 转义显示还原”。
+然后重启或重新加载 SillyTavern，在聊天输入框左侧点击魔杖“扩展”按钮，选择“Unicode 转义显示还原”。
 
 ## 测试
 

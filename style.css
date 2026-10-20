@@ -1,13 +1,21 @@
-.unicode-display-settings {
+.unicode-display-popup {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    width: min(24rem, calc(100vw - 3rem));
 }
 
-.unicode-display-settings h4 {
+.unicode-display-popup h3 {
     margin: 0;
 }
 
-.unicode-display-settings .unicode-display-hint {
+.unicode-display-popup .unicode-display-hint {
     opacity: 0.75;
+}
+
+.unicode-display-menu-item {
+    min-height: 44px;
+    align-items: center;
+    cursor: pointer;
+    touch-action: manipulation;
 }
