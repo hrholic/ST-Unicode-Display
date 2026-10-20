@@ -155,7 +155,7 @@ function makeSettingsPanel() {
     panel.className = 'extension_container unicode-display-settings';
 
     const title = document.createElement('h4');
-    title.textContent = 'Unicode ת����ʾ��ԭ';
+    title.textContent = 'Unicode 转义显示还原';
     panel.append(title);
 
     const enabledLabel = document.createElement('label');
@@ -165,24 +165,24 @@ function makeSettingsPanel() {
     enabled.id = 'unicode_display_decoder_enabled';
     enabled.checked = getSettings().enabled;
     const enabledText = document.createElement('span');
-    enabledText.textContent = '����ҳ����ʾʱ��ԭ Unicode ת��';
+    enabledText.textContent = '仅在页面显示时还原 Unicode 转义';
     enabledLabel.append(enabled, enabledText);
     panel.append(enabledLabel);
 
     const scopeLabel = document.createElement('label');
     scopeLabel.htmlFor = 'unicode_display_decoder_scope';
-    scopeLabel.textContent = '���÷�Χ';
+    scopeLabel.textContent = '适用范围';
     const scope = document.createElement('select');
     scope.id = 'unicode_display_decoder_scope';
     scope.className = 'text_pole';
-    scope.add(new Option('�� AI �ظ����Ƽ���', 'assistant'));
-    scope.add(new Option('ȫ��������Ϣ', 'all'));
+    scope.add(new Option('仅 AI 回复（推荐）', 'assistant'));
+    scope.add(new Option('全部聊天消息', 'all'));
     scope.value = getSettings().scope;
     panel.append(scopeLabel, scope);
 
     const hint = document.createElement('small');
     hint.className = 'unicode-display-hint';
-    hint.textContent = '�����޸������¼������顢�༭���˫��б��ת��ʾ������ԭ����';
+    hint.textContent = '不会修改聊天记录；代码块、编辑框和双反斜杠转义示例保持原样。';
     panel.append(hint);
 
     enabled.addEventListener('change', () => {
@@ -234,4 +234,3 @@ function start() {
 }
 
 subscribe('APP_READY', start);
-
