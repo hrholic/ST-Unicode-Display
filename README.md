@@ -12,7 +12,7 @@
 - 监听正文局部 DOM 变化以覆盖流式生成；在加载历史、生成完成、切换聊天、编辑及滑动消息时补充扫描当前聊天正文。
 - 每个文本节点只解码一层，防止重复事件把 `\u005Cu4F60` 继续级联解码。
 
-## 本地安装
+## 安装
 
 推荐在 SillyTavern 的扩展管理器中选择“安装扩展”，输入：
 
@@ -32,7 +32,7 @@ https://github.com/hrholic/ST-Unicode-Display
 需要 Node.js 20 或更新版本，无需安装依赖：
 
 ```powershell
-cd sillytavern-unicode-display
+cd ST-Unicode-Display
 npm test
 ```
 
