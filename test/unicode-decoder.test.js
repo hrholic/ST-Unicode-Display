@@ -31,29 +31,29 @@ function fakeNode(value, { inCode = false, isUser = false, isSystem = false } = 
     return { nodeValue: value, parentElement, innerHTML: '<unchanged>' };
 }
 
-test('��ͨ��������ͨ�ı����ֲ���', () => {
-    assert.equal(decodeUnicodeEscapes('��ã�SillyTavern��'), '��ã�SillyTavern��');
+test('普通中文与普通文本保持不变', () => {
+    assert.equal(decodeUnicodeEscapes('你好，SillyTavern！'), '你好，SillyTavern！');
 });
 
-test('��ԭ BMP Unicode ת������������', () => {
-    assert.equal(decodeUnicodeEscapes('\\u4F60\\u597D \\u{4E16}\\u{754C}'), '��� ����');
+test('还原 BMP Unicode 转义与大括号码点', () => {
+    assert.equal(decodeUnicodeEscapes('\\u4F60\\u597D \\u{4E16}\\u{754C}'), '你好 世界');
 });
 
-test('��ԭ�����Ժʹ����� emoji', () => {
-    assert.equal(decodeUnicodeEscapes('\\uD83D\\uDE00 \\u{1F680}'), '?? ??');
+test('还原代理对和大括号 emoji', () => {
+    assert.equal(decodeUnicodeEscapes('\\uD83D\\uDE00 \\u{1F680}'), '😀 🚀');
 });
 
-test('�Ƿ�ת��͹�����������ԭ��', () => {
+test('非法转义和孤立代理保持原样', () => {
     const input = '\\uZZZZ \\uD83D! \\uDE00 \\u{110000} \\u{D800} \\u{}';
     assert.equal(decodeUnicodeEscapes(input), input);
 });
 
-test('ż����б�ܱ���չʾ�﷨������ֻ�������һ��', () => {
+test('偶数反斜杠保持展示语法，奇数只解码最后一层', () => {
     assert.equal(decodeUnicodeEscapes('\\\\u4F60'), '\\\\u4F60');
-    assert.equal(decodeUnicodeEscapes('\\\\\\u4F60'), '\\\\��');
+    assert.equal(decodeUnicodeEscapes('\\\\\\u4F60'), '\\\\你');
 });
 
-test('HTML ע������ֻ��Ϊ�ı��ڵ�����', () => {
+test('HTML 注入内容只成为文本节点内容', () => {
     const node = fakeNode('\\u003Cimg src=x onerror=alert(1)\\u003E');
     const processor = createTextNodeProcessor(() => ({ enabled: true, scope: 'assistant' }));
 
@@ -63,14 +63,14 @@ test('HTML ע������ֻ��Ϊ�ı��ڵ�����', () => {
     assert.equal(node.innerHTML, '<unchanged>');
 });
 
-test('����������Ĭ���û���Ϣ��Χ������', () => {
+test('代码区域与默认用户消息范围不处理', () => {
     assert.equal(shouldProcessTextNode(fakeNode('\\u4F60', { inCode: true })), false);
     assert.equal(shouldProcessTextNode(fakeNode('\\u4F60', { isUser: true })), false);
     assert.equal(shouldProcessTextNode(fakeNode('\\u4F60', { isSystem: true })), false);
     assert.equal(shouldProcessTextNode(fakeNode('\\u4F60', { isUser: true }), 'all'), true);
 });
 
-test('�ظ��������ᷢ����������', () => {
+test('重复处理不会发生级联解码', () => {
     const node = fakeNode('\\u005Cu4F60');
     const processor = createTextNodeProcessor(() => ({ enabled: true, scope: 'assistant' }));
 
@@ -80,22 +80,22 @@ test('�ظ��������ᷢ����������', () => {
     assert.equal(node.nodeValue, '\\u4F60');
 });
 
-test('ͬһ�ı��ڵ�Ķ�̬���¿����´��������ɻָ�ԭ��', () => {
-    const node = fakeNode('��ʼ��\\u4F60');
+test('同一文本节点的动态更新可重新处理，并可恢复原文', () => {
+    const node = fakeNode('开始：\\u4F60');
     const processor = createTextNodeProcessor(() => ({ enabled: true, scope: 'assistant' }));
 
     processor.process(node);
-    assert.equal(node.nodeValue, '��ʼ����');
+    assert.equal(node.nodeValue, '开始：你');
 
-    node.nodeValue = '������\\u597D';
+    node.nodeValue = '增量：\\u597D';
     processor.process(node);
-    assert.equal(node.nodeValue, '��������');
+    assert.equal(node.nodeValue, '增量：好');
 
     assert.equal(processor.restore(node), true);
-    assert.equal(node.nodeValue, '������\\u597D');
+    assert.equal(node.nodeValue, '增量：\\u597D');
 });
 
-test('��ʽ׷������ԭʼ�㣬���������ʾ����ٴν���', () => {
+test('流式追加沿用原始层，不会把已显示结果再次解码', () => {
     const node = fakeNode('\\u005C');
     const processor = createTextNodeProcessor(() => ({ enabled: true, scope: 'assistant' }));
 
@@ -111,4 +111,3 @@ test('��ʽ׷������ԭʼ�㣬���������ʾ���
     processor.restore(node);
     assert.equal(node.nodeValue, '\\u005Cu4F60');
 });
-
