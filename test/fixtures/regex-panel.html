@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>Unicode regex panel fixture</title>
+</head>
+<body>
+    <textarea id="raw-data" style="display:none;"><M>\u60F3\u6CD5</M><T>\u003Cimg src=x onerror=alert(1)\u003E</T></textarea>
+    <button id="show-state" type="button">显示状态</button>
+    <div id="center-motive"></div>
+    <div id="info-trend"></div>
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const rawData = $('raw-data').value;
+        const extractTag = (tag) => rawData.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`))?.[1] ?? '';
+        const parsedState = {
+            motive: extractTag('M'),
+            trend: extractTag('T'),
+            trendIcon: '↗',
+        };
+
+        $('show-state').addEventListener('click', () => {
+            $('center-motive').innerText = parsedState.motive;
+            $('info-trend').innerHTML = `${parsedState.trendIcon} ${parsedState.trend}`;
+        });
+    </script>
+</body>
+</html>

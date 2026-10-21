@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>Unicode display browser harness</title>
+</head>
+<body>
+    <div id="extensionsMenu"></div>
+    <div id="chat">
+        <div class="mes" is_user="false" is_system="false">
+            <div class="mes_text">
+                <iframe id="panel" src="./regex-panel.html"></iframe>
+            </div>
+        </div>
+    </div>
+    <script>
+        const handlers = new Map();
+        const context = {
+            extensionSettings: {},
+            event_types: {
+                APP_READY: 'app-ready',
+                MESSAGE_UPDATED: 'message-updated',
+            },
+            eventSource: {
+                on(name, handler) {
+                    handlers.set(name, handler);
+                },
+            },
+            saveSettingsDebounced() {},
+            Popup: class {},
+            POPUP_TYPE: { TEXT: 'text' },
+        };
+        window.SillyTavern = { getContext: () => context };
+        window.fixtureReady = import('../../index.js').then(() => handlers.get('app-ready')?.());
+    </script>
+</body>
+</html>

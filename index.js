@@ -1,7 +1,7 @@
 import {
     createTextNodeProcessor,
-    shouldProcessTextNode,
 } from './unicode-decoder.js';
+import { createDomObserver } from './dom-observer.js';
 import {
     createSettingsPopupOpener,
     mountSettingsMenu,
@@ -13,10 +13,7 @@ const DEFAULT_SETTINGS = Object.freeze({
     scope: 'assistant',
 });
 
-let observer;
 let started = false;
-let frameId = 0;
-const pendingRoots = new Set();
 
 const context = SillyTavern.getContext();
 const processor = createTextNodeProcessor(getSettings);
@@ -34,125 +31,19 @@ function getSettings() {
     return extensionSettings[MODULE_NAME];
 }
 
-function walkText(root, callback) {
-    if (!root) {
-        return;
-    }
-
-    if (root.nodeType === Node.TEXT_NODE) {
-        callback(root);
-        return;
-    }
-
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    let node;
-    while ((node = walker.nextNode())) {
-        callback(node);
-    }
-}
-
-function processRoot(root) {
-    walkText(root, (node) => {
-        if (shouldProcessTextNode(node, getSettings().scope)) {
-            processor.process(node);
-        }
-    });
-}
-
-function restoreRoot(root) {
-    walkText(root, processor.restore);
-}
-
-function flushPendingRoots() {
-    frameId = 0;
-    const roots = [...pendingRoots];
-    pendingRoots.clear();
-
-    for (const root of roots) {
-        if (root?.isConnected) {
-            processRoot(root);
-        }
-    }
-}
-
-function scheduleRoot(root) {
-    if (!root) {
-        return;
-    }
-
-    pendingRoots.add(root);
-    if (!frameId) {
-        frameId = requestAnimationFrame(flushPendingRoots);
-    }
-}
-
-function scheduleChat() {
-    document.querySelectorAll('#chat .mes_text').forEach(scheduleRoot);
-}
-
-function bodyForNode(node) {
-    const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
-    return element?.matches?.('.mes_text') ? element : element?.closest?.('.mes_text');
-}
-
-function onMutations(mutations) {
-    if (!getSettings().enabled) {
-        return;
-    }
-
-    for (const mutation of mutations) {
-        if (mutation.type === 'characterData') {
-            if (bodyForNode(mutation.target)) {
-                processor.process(mutation.target, mutation.oldValue);
-            }
-            continue;
-        }
-
-        for (const added of mutation.addedNodes) {
-            const body = bodyForNode(added);
-            if (body) {
-                scheduleRoot(added.nodeType === Node.TEXT_NODE ? added : added);
-                continue;
-            }
-
-            if (added.nodeType === Node.ELEMENT_NODE) {
-                added.querySelectorAll?.('.mes_text').forEach(scheduleRoot);
-            }
-        }
-    }
-}
-
-function observeChat() {
-    const chat = document.querySelector('#chat');
-    if (!chat) {
-        return;
-    }
-
-    observer?.disconnect();
-    observer = new MutationObserver(onMutations);
-    observer.observe(chat, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        characterDataOldValue: true,
-    });
-}
-
-function restoreChat() {
-    document.querySelectorAll('#chat .mes_text').forEach(restoreRoot);
-}
-
-function applySettings() {
-    restoreChat();
-    if (getSettings().enabled) {
-        scheduleChat();
-    }
-}
+const domObserver = createDomObserver({
+    document,
+    MutationObserver,
+    requestAnimationFrame,
+    cancelAnimationFrame,
+    getSettings,
+    processor,
+});
 
 function updateSettings(patch) {
     Object.assign(getSettings(), patch);
     context.saveSettingsDebounced();
-    applySettings();
+    domObserver.applySettings();
 }
 
 const openSettingsPopup = createSettingsPopupOpener({
@@ -178,8 +69,8 @@ function start() {
     started = true;
     getSettings();
     mountSettingsMenu(document, openSettingsPopup);
-    observeChat();
-    scheduleChat();
+    domObserver.observeChat();
+    domObserver.scheduleChat();
 
     for (const eventName of [
         'CHARACTER_MESSAGE_RENDERED',
@@ -192,7 +83,7 @@ function start() {
         'CHAT_CHANGED',
         'CHAT_LOADED',
     ]) {
-        subscribe(eventName, scheduleChat);
+        subscribe(eventName, domObserver.scheduleChat);
     }
 }
 

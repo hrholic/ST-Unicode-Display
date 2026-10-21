@@ -115,12 +115,12 @@ export const SKIP_SELECTOR = [
     '.mes_edit',
 ].join(',');
 
-export function shouldProcessTextNode(node, scope = 'assistant') {
+export function shouldProcessTextNode(node, scope = 'assistant', messageOverride = null) {
     const parent = node?.parentElement;
     const body = parent?.closest?.('.mes_text');
-    const message = body?.closest?.('.mes');
+    const message = messageOverride ?? body?.closest?.('.mes');
 
-    if (!body || !message || parent.closest(SKIP_SELECTOR)) {
+    if ((!body && !messageOverride) || !message || parent?.closest?.(SKIP_SELECTOR)) {
         return false;
     }
 
@@ -134,9 +134,9 @@ export function shouldProcessTextNode(node, scope = 'assistant') {
 export function createTextNodeProcessor(getSettings) {
     const states = new WeakMap();
 
-    function process(node, observedOldValue) {
+    function process(node, observedOldValue, messageOverride = null) {
         const settings = getSettings();
-        if (!settings.enabled || !shouldProcessTextNode(node, settings.scope)) {
+        if (!settings.enabled || !shouldProcessTextNode(node, settings.scope, messageOverride)) {
             return false;
         }
 
