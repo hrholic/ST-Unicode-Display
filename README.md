@@ -29,6 +29,10 @@ https://github.com/hrholic/ST-Unicode-Display
 
 然后重启或重新加载 SillyTavern，在聊天输入框左侧点击魔杖“扩展”按钮，选择“Unicode 转义显示还原”。
 
+## 更新
+
+从 1.1.2 起允许 SillyTavern 自动检查扩展更新。已经安装 1.1.1 或更早版本的用户，本地清单仍为 `auto_update: false`，因此需要先在扩展管理器中手动检查并更新一次，然后重新加载页面；之后才会使用新清单参与自动检查。
+
 ## 测试
 
 需要 Node.js 20 或更新版本，无需安装依赖：
